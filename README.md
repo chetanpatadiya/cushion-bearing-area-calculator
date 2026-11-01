@@ -43,15 +43,15 @@ Any static file server works; the page uses ES modules, so open it over http rat
 
 ## Deploy
 
-The `public/` folder is the whole site. It uses relative paths only, so it works at a domain root or under a sub-path such as `/calculators/cushion-bearing-area/` (the charter's canonical route).
+Live at **https://chetanpatadiya.com/cushion-bearing-area-calculator/** and listed under Featured Engineering Tools on https://chetanpatadiya.com.
 
-Cloudflare Pages with Wrangler:
+Deployment is automatic. `.github/workflows/pages.yml` runs the verification tests on every push and pull request; on `main` it publishes `public/` to GitHub Pages only if every test passes. In the repository's Settings → Pages, the source must be **GitHub Actions**.
+
+The `public/` folder is the whole site and uses relative paths only, so it also works at a domain root or under another sub-path (the charter proposed `/calculators/cushion-bearing-area/`; this deployment follows the site's existing one-path-per-tool convention instead). Cloudflare Pages is an alternative:
 
 ```
 npx wrangler pages deploy public --project-name cushion-bearing-area-calculator
 ```
-
-GitHub Pages also works: publish the `public/` folder.
 
 Nothing is sent anywhere. Inputs stay in the browser (remembered in local storage on that device only) and exports are generated locally.
 
