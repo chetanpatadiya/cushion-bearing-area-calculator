@@ -1,0 +1,18 @@
+{
+  "name": "cushion-bearing-area-calculator",
+  "version": "0.1.0",
+  "description": "EP01 Cushion Bearing Area and Shock Response Calculator: static pressure, required bearing area and transmitted peak acceleration from measured cushion curves.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "npx --yes serve public -l 4173"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "Chetan Patadiya",
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
+}

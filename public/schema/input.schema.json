@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/calculators/cushion-bearing-area/schema/input.schema.json",
+  "title": "EP01 cushion bearing area calculator input",
+  "description": "Input accepted by engine.evaluate() for engine version 0.1.x. Numeric values may be numbers or decimal strings as entered by the user; they are parsed by the engine.",
+  "type": "object",
+  "required": ["scenario", "curve", "configurations"],
+  "additionalProperties": false,
+  "$defs": {
+    "numeric": {
+      "description": "A number, or a decimal string such as \"2\", \"0.5\" or \"1.2e3\". Empty string means not entered.",
+      "type": ["number", "string"]
+    },
+    "length": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "$ref": "#/$defs/numeric" },
+        "unit": { "enum": ["mm", "cm", "m", "in"] }
+      }
+    },
+    "area": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "$ref": "#/$defs/numeric" },
+        "unit": { "enum": ["mm2", "cm2", "m2"] }
+      }
+    },
+    "pressure": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "$ref": "#/$defs/numeric" },
+        "unit": { "enum": ["Pa", "kPa", "psi"] }
+      }
+    }
+  },
+  "properties": {
+    "scenario": {
+      "type": "object",
+      "required": ["massKg", "dropHeight", "orientation"],
+      "additionalProperties": false,
+      "properties": {
+        "massKg": { "$ref": "#/$defs/numeric", "description": "Mass supported by the cushion, kg." },
+        "dropHeight": { "$ref": "#/$defs/length", "description": "Design drop height of the shipping scenario." },
+        "orientation": { "type": "string", "description": "Orientation for which the bearing area applies, e.g. flat bottom face." }
+      }
+    },
+    "curve": {
+      "description": "One measured cushion curve for a fixed material, thickness and drop condition, or null for static-loading results only.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": [
+            "datasetId", "datasetVersion", "dataType", "material", "thickness", "dropHeight",
+            "source", "testMethod", "temperatureC", "dropSequence", "pointPressureUnit", "points"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "datasetId": { "type": "string" },
+            "datasetVersion": { "type": "string", "description": "Version of the curve dataset, independent of the engine version." },
+            "dataType": { "enum": ["measured-supplier", "measured-in-house", "synthetic"] },
+            "material": { "type": "string" },
+            "thickness": { "$ref": "#/$defs/length" },
+            "dropHeight": { "$ref": "#/$defs/length", "description": "Drop height at which the curve was measured." },
+            "source": { "type": "string", "description": "Document, supplier or report the points come from." },
+            "testMethod": { "type": "string", "description": "e.g. ASTM D1596 (confirm edition)." },
+            "temperatureC": { "$ref": "#/$defs/numeric" },
+            "dropSequence": { "type": "string", "description": "Which drops the reported values represent, e.g. average of drops 2 to 5." },
+            "useRights": { "type": "string", "description": "Permission basis for using supplier data." },
+            "notes": { "type": "string" },
+            "pointPressureUnit": { "enum": ["Pa", "kPa", "psi"] },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["pressure", "accelerationG"],
+                "additionalProperties": false,
+                "properties": {
+                  "pressure": { "$ref": "#/$defs/numeric" },
+                  "accelerationG": { "$ref": "#/$defs/numeric" }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "configurations": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "mode"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "mode": { "enum": ["area", "pressure"], "description": "area: user enters bearing area; pressure: user enters target static pressure and the required area is calculated." },
+          "area": { "$ref": "#/$defs/area" },
+          "targetPressure": { "$ref": "#/$defs/pressure" }
+        }
+      }
+    },
+    "fragility": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["enabled"],
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "criticalG": { "$ref": "#/$defs/numeric" },
+            "pulseShape": { "type": "string" },
+            "pulseDurationMs": { "$ref": "#/$defs/numeric" },
+            "velocityChangeMps": { "$ref": "#/$defs/numeric" },
+            "method": { "type": "string" },
+            "conditionsConfirmed": { "type": "boolean" }
+          }
+        }
+      ]
+    }
+  }
+}

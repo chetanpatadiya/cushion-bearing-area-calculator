@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cushion Bearing Area Calculator</title>
+  <meta name="description" content="Static pressure, required bearing area and transmitted peak acceleration from measured cushion curves, for packaging, mechanical, reliability and test engineers.">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2314232e'/%3E%3Cpath d='M5 9 Q 11 26 16 22 T 27 11' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#results">Skip to results</a>
+
+  <header class="masthead">
+    <div>
+      <h1>Cushion bearing area and shock response</h1>
+      <p class="lede">Size the bearing area of a cushion and read the transmitted peak acceleration from your own measured cushion curve. Up to three configurations side by side.</p>
+    </div>
+    <div>
+      <nav aria-label="Calculator pages">
+        <a href="methodology.html">Methodology</a>
+        <a href="methodology.html#worked-examples">Worked examples</a>
+      </nav>
+      <p class="version-tag" id="version-tag">Engine 0.1.0</p>
+    </div>
+  </header>
+
+  <main class="workspace" id="main">
+    <!-- ================= INPUTS ================= -->
+    <div class="inputs-col">
+
+      <section class="panel" aria-labelledby="scenario-h">
+        <div class="panel-head">
+          <h2 id="scenario-h">Shipping scenario</h2>
+          <p>The load the cushion carries and the drop it must absorb.</p>
+        </div>
+        <div class="field">
+          <label for="mass">Supported mass (kg)</label>
+          <input id="mass" inputmode="decimal" autocomplete="off" data-bind="scenario.massKg" aria-describedby="mass-hint mass-err">
+          <span class="hint" id="mass-hint">Mass resting on this cushion in the chosen orientation.</span>
+          <span class="field-error" id="mass-err" aria-live="polite"></span>
+        </div>
+        <div class="field">
+          <label for="drop">Design drop height</label>
+          <div class="with-unit">
+            <input id="drop" inputmode="decimal" autocomplete="off" data-bind="scenario.dropHeight.value" aria-describedby="drop-hint">
+            <select aria-label="Drop height unit" data-bind="scenario.dropHeight.unit">
+              <option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="in">in</option>
+            </select>
+          </div>
+          <span class="hint" id="drop-hint">Must match the drop height at which the cushion curve was measured.</span>
+        </div>
+        <div class="field">
+          <label for="orientation">Orientation</label>
+          <input id="orientation" type="text" autocomplete="off" data-bind="scenario.orientation" placeholder="e.g. flat, bottom face" aria-describedby="orient-hint">
+          <span class="hint" id="orient-hint">Bearing area is the actual supporting area for this orientation.</span>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="curve-h">
+        <div class="panel-head">
+          <h2 id="curve-h">Cushion curve</h2>
+          <p>One measured curve for a single material, thickness and drop height. Leave empty for static-loading results only.</p>
+        </div>
+
+        <div id="curve-synthetic" class="synthetic-band" hidden>Synthetic verification data. Not material evidence; do not use for design decisions.</div>
+
+        <div class="field" style="margin-top:0.75rem">
+          <label for="dataType">Data type</label>
+          <select id="dataType" data-bind="curve.dataType" data-curve-field="dataType">
+            <option value="">Choose the evidence class</option>
+            <option value="measured-supplier">Measured, supplier published data</option>
+            <option value="measured-in-house">Measured, in-house test data</option>
+            <option value="synthetic">Synthetic, verification only</option>
+          </select>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="datasetId">Dataset ID</label>
+            <input id="datasetId" type="text" autocomplete="off" data-bind="curve.datasetId" data-curve-field="datasetId">
+          </div>
+          <div class="field">
+            <label for="datasetVersion">Dataset version</label>
+            <input id="datasetVersion" type="text" autocomplete="off" data-bind="curve.datasetVersion" data-curve-field="datasetVersion">
+          </div>
+        </div>
+        <div class="field">
+          <label for="material">Material</label>
+          <input id="material" type="text" autocomplete="off" data-bind="curve.material" data-curve-field="material" placeholder="Grade and density as stated by the source">
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="thickness">Thickness</label>
+            <div class="with-unit">
+              <input id="thickness" inputmode="decimal" autocomplete="off" data-bind="curve.thickness.value" data-curve-field="thickness">
+              <select aria-label="Thickness unit" data-bind="curve.thickness.unit">
+                <option value="mm">mm</option><option value="cm">cm</option><option value="in">in</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="curveDrop">Test drop height</label>
+            <div class="with-unit">
+              <input id="curveDrop" inputmode="decimal" autocomplete="off" data-bind="curve.dropHeight.value" data-curve-field="dropHeight">
+              <select aria-label="Test drop height unit" data-bind="curve.dropHeight.unit">
+                <option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option><option value="in">in</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="source">Curve source</label>
+          <input id="source" type="text" autocomplete="off" data-bind="curve.source" data-curve-field="source" placeholder="Document, page or report number">
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="testMethod">Test method</label>
+            <input id="testMethod" type="text" autocomplete="off" data-bind="curve.testMethod" data-curve-field="testMethod" placeholder="e.g. ASTM D1596 (edition)">
+          </div>
+          <div class="field">
+            <label for="temperature">Test temperature (°C)</label>
+            <input id="temperature" inputmode="decimal" autocomplete="off" data-bind="curve.temperatureC" data-curve-field="temperatureC">
+          </div>
+        </div>
+        <div class="field">
+          <label for="dropSequence">Drop sequence</label>
+          <input id="dropSequence" type="text" autocomplete="off" data-bind="curve.dropSequence" data-curve-field="dropSequence" placeholder="e.g. average of drops 2 to 5">
+        </div>
+        <div class="field" id="useRightsField">
+          <label for="useRights">Use rights</label>
+          <input id="useRights" type="text" autocomplete="off" data-bind="curve.useRights" placeholder="Permission basis for using this data">
+          <span class="hint">Needed before releasing results based on supplier data.</span>
+        </div>
+
+        <h3 style="margin-top:0.5rem">Curve points</h3>
+        <div class="field" style="margin-top:0.5rem">
+          <label for="pointUnit">Static pressure unit for points</label>
+          <select id="pointUnit" data-bind="curve.pointPressureUnit" style="max-width:10rem">
+            <option value="kPa">kPa</option><option value="psi">psi</option><option value="Pa">Pa</option>
+          </select>
+        </div>
+        <table class="points-table" aria-describedby="points-hint">
+          <caption class="visually-hidden">Measured cushion curve points</caption>
+          <thead><tr><th scope="col"><span class="visually-hidden">Row</span></th><th scope="col" id="th-pressure">Static pressure (kPa)</th><th scope="col">Peak acceleration (g)</th><th scope="col"><span class="visually-hidden">Remove</span></th></tr></thead>
+          <tbody id="points-body"></tbody>
+        </table>
+        <p class="hint small muted" id="points-hint">Enter the measured points as published. They are sorted by pressure and joined with straight lines; nothing is fitted or extrapolated.</p>
+        <div class="button-row">
+          <button type="button" id="add-point">Add point</button>
+          <button type="button" id="load-synthetic">Load synthetic test curve</button>
+          <button type="button" class="quiet" id="clear-curve">Clear curve</button>
+        </div>
+
+        <details class="disclosure">
+          <summary>Import points from CSV</summary>
+          <p class="small muted">Two columns: static pressure (in the unit above), peak acceleration (g). A header row is optional. Importing replaces the current points.</p>
+          <div class="field">
+            <label for="csv-file">CSV file</label>
+            <input id="csv-file" type="file" accept=".csv,text/csv,text/plain">
+          </div>
+          <div class="field">
+            <label for="csv-text">Or paste rows</label>
+            <textarea id="csv-text" spellcheck="false" placeholder="pressure,peak g&#10;1.5,62&#10;3.0,41"></textarea>
+          </div>
+          <div class="button-row"><button type="button" id="csv-import">Import pasted rows</button></div>
+          <div id="csv-status" aria-live="polite"></div>
+        </details>
+
+        <div id="curve-errors" aria-live="polite"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="configs-h">
+        <div class="panel-head">
+          <h2 id="configs-h">Configurations</h2>
+          <p>Compare up to three. Enter a bearing area, or a target static pressure to get the area it needs.</p>
+        </div>
+        <div id="configs"></div>
+        <button type="button" id="add-config">Add configuration</button>
+      </section>
+
+      <section class="panel" aria-labelledby="frag-h">
+        <div class="panel-head">
+          <h2 id="frag-h">Product fragility (optional)</h2>
+          <p>A measured fragility can be compared only when its shock pulse is compatible with the cushion test. This comparison is not a shipping qualification.</p>
+        </div>
+        <label class="field" style="display:flex;gap:0.5rem;align-items:center">
+          <input type="checkbox" id="frag-enabled" data-bind="fragility.enabled" style="width:1.1rem;height:1.1rem">
+          <span>Include a fragility comparison</span>
+        </label>
+        <div id="frag-fields" hidden>
+          <div class="row-2">
+            <div class="field">
+              <label for="fragG">Critical acceleration (g)</label>
+              <input id="fragG" inputmode="decimal" autocomplete="off" data-bind="fragility.criticalG">
+            </div>
+            <div class="field">
+              <label for="fragShape">Pulse shape</label>
+              <select id="fragShape" data-bind="fragility.pulseShape">
+                <option value="">Choose</option>
+                <option>Half-sine</option><option>Trapezoidal</option><option>Square</option><option>Other (see method)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label for="fragDur">Pulse duration (ms)</label>
+              <input id="fragDur" inputmode="decimal" autocomplete="off" data-bind="fragility.pulseDurationMs">
+            </div>
+            <div class="field">
+              <label for="fragDv">Velocity change (m/s)</label>
+              <input id="fragDv" inputmode="decimal" autocomplete="off" data-bind="fragility.velocityChangeMps" aria-describedby="fragDv-hint">
+              <span class="hint" id="fragDv-hint">Optional.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fragMethod">Fragility test method and source</label>
+            <input id="fragMethod" type="text" autocomplete="off" data-bind="fragility.method" placeholder="e.g. ASTM D3332 Method B, report number">
+          </div>
+          <label class="field" style="display:grid;grid-template-columns:1.1rem 1fr;gap:0.5rem;align-items:start">
+            <input type="checkbox" id="frag-confirm" data-bind="fragility.conditionsConfirmed" style="width:1.1rem;height:1.1rem;margin-top:0.2rem">
+            <span>I have confirmed that this fragility pulse is compatible with the cushion test conditions for this scenario.</span>
+          </label>
+        </div>
+      </section>
+
+      <div class="button-row">
+        <button type="button" class="quiet" id="reset-all">Start over</button>
+      </div>
+    </div>
+
+    <!-- ================= RESULTS ================= -->
+    <div class="results-col" id="results" tabindex="-1">
+      <section class="panel plot-panel" aria-labelledby="plot-h">
+        <div class="panel-head" style="margin-bottom:0.5rem">
+          <h2 id="plot-h">Operating points on the cushion curve</h2>
+        </div>
+        <div class="status-line" id="shock-status" data-state="off" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="shock-status-text"></span>
+        </div>
+        <div id="result-synthetic" class="synthetic-band" hidden style="margin-top:0.75rem">Synthetic verification data. These numbers check the calculator; they say nothing about any material.</div>
+        <div class="plot-wrap" id="plot" style="margin-top:0.75rem"></div>
+        <p class="plot-caption" id="plot-caption"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="results-h">
+        <div class="panel-head">
+          <h2 id="results-h">Results</h2>
+          <div class="button-row">
+            <button type="button" id="export-json">Export JSON record</button>
+            <button type="button" id="print-summary-btn">Print summary</button>
+          </div>
+        </div>
+        <div class="results-table-wrap" id="results-table" aria-live="polite"></div>
+        <ul class="result-messages" id="result-messages"></ul>
+        <p class="candidate" id="candidate"></p>
+        <div id="fragility-result"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="record-h">
+        <div class="panel-head">
+          <h2 id="record-h">Source and applicability record</h2>
+          <p>What these results rest on. Exported with every record.</p>
+        </div>
+        <div id="record"></div>
+        <ul class="checks" id="checks"></ul>
+        <div id="warnings" style="margin-top:0.875rem" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Engineering decision support only. Results are only as applicable as the cushion-curve data entered: material data may differ from assembled-package performance. This calculator does not perform shipping qualification and makes no claim of conformance to any standard. Product owner: Chetan Patadiya. Calculator EP01, planning release 0.1.</p>
+  </footer>
+
+  <div id="print-summary" aria-hidden="true"></div>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+[
+  {
+    "id": "WE-01",
+    "title": "Static loading only (no cushion curve)",
+    "purpose": "Charter acceptance case: 2 kg on 100 cm² gives 1961.33 Pa; doubling the area halves the pressure.",
+    "evidence": "Equation check only. No material data involved.",
+    "input": {
+      "scenario": { "massKg": "2", "dropHeight": { "value": "762", "unit": "mm" }, "orientation": "Flat, bottom face" },
+      "curve": null,
+      "configurations": [
+        { "id": "A", "label": "100 cm²", "mode": "area", "area": { "value": "100", "unit": "cm2" } },
+        { "id": "B", "label": "200 cm²", "mode": "area", "area": { "value": "200", "unit": "cm2" } },
+        { "id": "C", "label": "5000 mm²", "mode": "area", "area": { "value": "5000", "unit": "mm2" } }
+      ],
+      "fragility": null
+    },
+    "expected": [
+      { "staticPressurePa": 1961.33, "bearingAreaM2": 0.01, "peakAccelerationG": null, "shockStatus": "disabled" },
+      { "staticPressurePa": 980.665, "bearingAreaM2": 0.02, "peakAccelerationG": null, "shockStatus": "disabled" },
+      { "staticPressurePa": 3922.66, "bearingAreaM2": 0.005, "peakAccelerationG": null, "shockStatus": "disabled" }
+    ]
+  },
+  {
+    "id": "WE-02",
+    "title": "Required area for a target static pressure (synthetic curve)",
+    "purpose": "Charter acceptance case: synthetic points (1 kPa, 50 g) and (3 kPa, 30 g) interpolate to 40 g at 2 kPa. The area that puts 2 kg at 2 kPa is 98.0665 cm².",
+    "evidence": "SYNTHETIC verification data. Not material evidence.",
+    "input": {
+      "scenario": { "massKg": "2", "dropHeight": { "value": "762", "unit": "mm" }, "orientation": "Flat, bottom face" },
+      "curve": {
+        "datasetId": "SYN-EP01-VERIFY",
+        "datasetVersion": "1.0.0",
+        "dataType": "synthetic",
+        "material": "Synthetic verification data",
+        "thickness": { "value": "50", "unit": "mm" },
+        "dropHeight": { "value": "762", "unit": "mm" },
+        "source": "EP01 charter acceptance case",
+        "testMethod": "None (synthetic)",
+        "temperatureC": "23",
+        "dropSequence": "Not applicable",
+        "pointPressureUnit": "kPa",
+        "points": [
+          { "pressure": "1", "accelerationG": "50" },
+          { "pressure": "3", "accelerationG": "30" }
+        ]
+      },
+      "configurations": [
+        { "id": "A", "label": "Target 2 kPa", "mode": "pressure", "targetPressure": { "value": "2", "unit": "kPa" } }
+      ],
+      "fragility": null
+    },
+    "expected": [
+      { "staticPressurePa": 2000, "bearingAreaM2": 0.00980665, "peakAccelerationG": 40, "shockStatus": "interpolated" }
+    ]
+  },
+  {
+    "id": "WE-03",
+    "title": "Comparing three bearing areas (synthetic curve)",
+    "purpose": "Shows interpolation inside the data and the refusal to extrapolate outside it.",
+    "evidence": "SYNTHETIC verification data. Not material evidence.",
+    "input": {
+      "scenario": { "massKg": "2", "dropHeight": { "value": "30", "unit": "in" }, "orientation": "Flat, bottom face" },
+      "curve": {
+        "datasetId": "SYN-EP01-VERIFY",
+        "datasetVersion": "1.0.0",
+        "dataType": "synthetic",
+        "material": "Synthetic verification data",
+        "thickness": { "value": "50", "unit": "mm" },
+        "dropHeight": { "value": "762", "unit": "mm" },
+        "source": "EP01 charter acceptance case",
+        "testMethod": "None (synthetic)",
+        "temperatureC": "23",
+        "dropSequence": "Not applicable",
+        "pointPressureUnit": "kPa",
+        "points": [
+          { "pressure": "1", "accelerationG": "50" },
+          { "pressure": "3", "accelerationG": "30" }
+        ]
+      },
+      "configurations": [
+        { "id": "A", "label": "80 cm²", "mode": "area", "area": { "value": "80", "unit": "cm2" } },
+        { "id": "B", "label": "150 cm²", "mode": "area", "area": { "value": "150", "unit": "cm2" } },
+        { "id": "C", "label": "300 cm²", "mode": "area", "area": { "value": "300", "unit": "cm2" } }
+      ],
+      "fragility": null
+    },
+    "expected": [
+      { "staticPressurePa": 2451.6625, "peakAccelerationG": 35.483375, "shockStatus": "interpolated" },
+      { "staticPressurePa": 1307.5533333333333, "peakAccelerationG": 46.92446666666667, "shockStatus": "interpolated" },
+      { "staticPressurePa": 653.7766666666667, "peakAccelerationG": null, "shockStatus": "out-of-range" }
+    ]
+  },
+  {
+    "id": "WE-04",
+    "title": "Drop height does not match the curve",
+    "purpose": "A curve measured at 762 mm cannot predict a 610 mm drop. Shock prediction is disabled; static results remain.",
+    "evidence": "SYNTHETIC verification data. Not material evidence.",
+    "input": {
+      "scenario": { "massKg": "2", "dropHeight": { "value": "610", "unit": "mm" }, "orientation": "Flat, bottom face" },
+      "curve": {
+        "datasetId": "SYN-EP01-VERIFY",
+        "datasetVersion": "1.0.0",
+        "dataType": "synthetic",
+        "material": "Synthetic verification data",
+        "thickness": { "value": "50", "unit": "mm" },
+        "dropHeight": { "value": "762", "unit": "mm" },
+        "source": "EP01 charter acceptance case",
+        "testMethod": "None (synthetic)",
+        "temperatureC": "23",
+        "dropSequence": "Not applicable",
+        "pointPressureUnit": "kPa",
+        "points": [
+          { "pressure": "1", "accelerationG": "50" },
+          { "pressure": "3", "accelerationG": "30" }
+        ]
+      },
+      "configurations": [
+        { "id": "A", "label": "100 cm²", "mode": "area", "area": { "value": "100", "unit": "cm2" } }
+      ],
+      "fragility": null
+    },
+    "expected": [
+      { "staticPressurePa": 1961.33, "peakAccelerationG": null, "shockStatus": "disabled" }
+    ]
+  }
+]

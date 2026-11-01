@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/calculators/cushion-bearing-area/schema/output.schema.json",
+  "title": "EP01 cushion bearing area calculator export record",
+  "description": "Record produced by engine.buildExportRecord() and downloaded by the Export button. Results are SI at full precision.",
+  "type": "object",
+  "required": [
+    "calculatorId", "engineVersion", "specVersion", "generatedAt", "units", "inputs",
+    "dataSources", "assumptions", "shock", "results", "candidate", "fragility", "warnings", "disclaimer"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nullableNumber": { "type": ["number", "null"] }
+  },
+  "properties": {
+    "calculatorId": { "const": "ep01-cushion-bearing-area" },
+    "engineVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "specVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "units": {
+      "type": "object",
+      "required": ["mass", "staticPressure", "bearingArea", "peakAcceleration", "length"],
+      "properties": {
+        "mass": { "const": "kg" },
+        "staticPressure": { "const": "Pa" },
+        "bearingArea": { "const": "m²" },
+        "peakAcceleration": { "type": "string" },
+        "length": { "const": "m" },
+        "note": { "type": "string" }
+      }
+    },
+    "inputs": { "description": "The input object exactly as evaluated (see input.schema.json).", "type": "object" },
+    "dataSources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["datasetId", "datasetVersion", "dataType", "source", "testMethod", "materialEvidence"],
+        "properties": {
+          "datasetId": { "type": "string" },
+          "datasetVersion": { "type": "string" },
+          "dataType": { "type": "string" },
+          "source": { "type": "string" },
+          "testMethod": { "type": "string" },
+          "materialEvidence": { "type": "boolean", "description": "False for synthetic data, always." }
+        }
+      }
+    },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "shock": {
+      "type": "object",
+      "required": ["enabled", "reason", "message"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "reason": { "enum": ["ok", "no-curve", "curve-invalid", "drop-height-missing", "drop-height-mismatch"] },
+        "message": { "type": "string" }
+      }
+    },
+    "results": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "mode", "status", "staticPressurePa", "bearingAreaM2", "peakAccelerationG", "shockStatus", "messages"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "mode": { "enum": ["area", "pressure"] },
+          "status": { "enum": ["ok", "error"] },
+          "staticPressurePa": { "$ref": "#/$defs/nullableNumber" },
+          "bearingAreaM2": { "$ref": "#/$defs/nullableNumber" },
+          "peakAccelerationG": { "$ref": "#/$defs/nullableNumber" },
+          "shockStatus": { "enum": ["interpolated", "out-of-range", "disabled", "pending"] },
+          "messages": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "candidate": {
+      "description": "Measured curve point with the lowest peak acceleration and the bearing area that would place the load there. Null when shock prediction is disabled.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["pressurePa", "accelerationG", "bearingAreaM2", "atCurveBoundary"],
+          "properties": {
+            "pressurePa": { "type": "number" },
+            "accelerationG": { "type": "number" },
+            "bearingAreaM2": { "type": "number" },
+            "atCurveBoundary": { "type": "boolean" }
+          }
+        }
+      ]
+    },
+    "fragility": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["criticalG", "status", "comparisons", "note"],
+          "properties": {
+            "criticalG": { "$ref": "#/$defs/nullableNumber" },
+            "status": { "enum": ["active", "inactive", "invalid", "incomplete", "unconfirmed", "no-shock"] },
+            "comparisons": { "type": "array" },
+            "note": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "disclaimer": { "type": "string" }
+  }
+}

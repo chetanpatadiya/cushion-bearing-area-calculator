@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cushion Calculator Methodology</title>
+  <meta name="description" content="Equations, interpolation rule, applicability checks and limits of the EP01 cushion bearing area and shock response calculator.">
+  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2314232e'/%3E%3Cpath d='M5 9 Q 11 26 16 22 T 27 11' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="masthead" style="max-width:46rem">
+    <div>
+      <h1>How the calculator works</h1>
+      <p class="lede">Methodology for the cushion bearing area and shock response calculator, specification 0.1.0.</p>
+    </div>
+    <nav aria-label="Calculator pages"><a href="./">Back to the calculator</a></nav>
+  </header>
+
+  <main class="prose">
+    <article class="panel">
+      <h2>What it answers</h2>
+      <p>For one shipping scenario, the calculator gives the static pressure a product puts on its cushion, the bearing area needed to reach a chosen static pressure, and the peak acceleration transmitted through the cushion as read from a measured cushion curve. Up to three bearing-area configurations can be compared on the same curve.</p>
+      <p>It is intended for packaging, mechanical, reliability and test engineers who already hold measured cushion-curve data for the material, thickness and drop height they are considering.</p>
+
+      <h2>Static pressure and bearing area</h2>
+      <p>Static pressure (also called static stress or static loading) is the weight of the supported mass spread over the area of cushion that carries it:</p>
+      <p class="eq">p = m × g / A</p>
+      <p>Rearranged, the bearing area that produces a target static pressure is:</p>
+      <p class="eq">A = m × g / p</p>
+      <p>where m is the supported mass in kg, g is standard gravity, 9.80665 m/s², A is the bearing area in m² and p is the static pressure in Pa. The bearing area is the cushion area actually in contact with and supporting the product in the selected orientation, not the overall footprint of the pack.</p>
+      <p>Example: 2 kg on 100 cm² gives 2 × 9.80665 / 0.01 = 1961.33 Pa. Doubling the area to 200 cm² halves the pressure to 980.665 Pa.</p>
+
+      <h2>Peak acceleration from a cushion curve</h2>
+      <p>A cushion curve reports the peak acceleration measured when a weighted platen is dropped onto a cushion, at several static pressures, for one material, one thickness and one drop height. Test methods such as ASTM D1596 describe how such data are produced.</p>
+      <p>The calculator reads the peak acceleration at the computed static pressure by joining adjacent measured points with straight lines. Between points (p₁, G₁) and (p₂, G₂):</p>
+      <p class="eq">G = G₁ + (p − p₁) × (G₂ − G₁) / (p₂ − p₁)</p>
+      <p>Example with synthetic points (1 kPa, 50 g) and (3 kPa, 30 g): at 2 kPa the result is 40 g.</p>
+      <p>Nothing else is used. The calculator does not fit a curve, does not estimate acceleration from foam density, does not supply material presets, and does not choose a foam for you.</p>
+
+      <h2>When it refuses to give a number</h2>
+      <table>
+        <thead><tr><th scope="col">Situation</th><th scope="col">What happens</th></tr></thead>
+        <tbody>
+          <tr><td>Static pressure outside the measured range</td><td>No peak acceleration is shown. The curve may turn sharply beyond the data, so extrapolation is not permitted.</td></tr>
+          <tr><td>Scenario drop height differs from the curve's test drop height by more than 1 %</td><td>Shock prediction is switched off. Curves do not transfer between drop heights.</td></tr>
+          <tr><td>Curve metadata missing (source, method, temperature, drop sequence, thickness and so on)</td><td>Shock prediction is switched off until the record is complete.</td></tr>
+          <tr><td>Two points share the same static pressure</td><td>The curve is rejected. Remove or average the duplicates first.</td></tr>
+          <tr><td>Fewer than two points, or any value zero or negative</td><td>The curve is rejected.</td></tr>
+          <tr><td>Mass or area zero, negative or not a number</td><td>That configuration shows no result and says which input to fix.</td></tr>
+          <tr><td>No curve entered</td><td>Static pressure and bearing area are still calculated; shock prediction is off.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Comparing with product fragility</h2>
+      <p>A product fragility value, for example from ASTM D3332 testing, can be shown against the interpolated peak acceleration. The comparison appears only when you enter the pulse shape, pulse duration and test method, and confirm that the fragility pulse is compatible with the cushion test conditions. A shock pulse from a cushioned drop is not automatically equivalent to a shock-machine pulse, so this is a check you have to make. The comparison is not a shipping qualification.</p>
+
+      <h2>Synthetic data</h2>
+      <p>The "Load synthetic test curve" button fills in the two synthetic points from the project charter so you can check the calculator. Synthetic data is labelled on screen, on the plot, in printouts and in exports, and is always recorded as not material evidence.</p>
+
+      <h2>What the results do and do not mean</h2>
+      <ul>
+        <li>Cushion-curve data describe the cushion material under laboratory conditions. Assembled packages can perform differently because of creep, multiple impacts, corner and edge drops, temperature, humidity and the pack's own structure.</li>
+        <li>Results are as good as the curve you enter. Confirm that it matches your material, thickness, drop height, temperature and drop sequence.</li>
+        <li>The calculator makes no claim of conformance to any standard. Confirm the applicable editions of any standard before relying on a standard-specific workflow.</li>
+      </ul>
+
+      <h2 id="worked-examples">Worked examples</h2>
+      <p>All examples use 2 kg. Examples 2 to 4 use the synthetic curve (1 kPa, 50 g) and (3 kPa, 30 g), measured at a 762 mm drop. Synthetic data checks the arithmetic only; it says nothing about any material. The same examples are kept in machine-readable form in <a href="examples/worked-examples.json">worked-examples.json</a> and re-run by the automated tests.</p>
+      <table>
+        <thead><tr><th scope="col">Example</th><th scope="col">Entered</th><th scope="col">Static pressure</th><th scope="col">Peak acceleration</th></tr></thead>
+        <tbody>
+          <tr><td>1. No curve</td><td>100 cm²</td><td>1961.33 Pa</td><td>Not available (no curve)</td></tr>
+          <tr><td></td><td>200 cm²</td><td>980.665 Pa</td><td>Not available (no curve)</td></tr>
+          <tr><td></td><td>5000 mm²</td><td>3922.66 Pa</td><td>Not available (no curve)</td></tr>
+          <tr><td>2. Target pressure</td><td>2 kPa target</td><td>2000 Pa, needs 98.0665 cm²</td><td>40 g</td></tr>
+          <tr><td>3. Three areas, 30 in drop</td><td>80 cm²</td><td>2451.66 Pa</td><td>35.48 g</td></tr>
+          <tr><td></td><td>150 cm²</td><td>1307.55 Pa</td><td>46.92 g</td></tr>
+          <tr><td></td><td>300 cm²</td><td>653.78 Pa</td><td>Refused: below the curve data</td></tr>
+          <tr><td>4. 610 mm drop</td><td>100 cm²</td><td>1961.33 Pa</td><td>Refused: drop height does not match the curve</td></tr>
+        </tbody>
+      </table>
+      <p>In example 3, a 30 in drop is 762 mm, so it matches the curve's drop height.</p>
+
+      <h2>Verification and versions</h2>
+      <p>The calculation engine is a single JavaScript module shared by this page and its automated tests, so the verified code is the code that runs. The tests cover the charter's acceptance cases: 2 kg on 100 cm² gives 1961.33 Pa; doubling area halves pressure; the synthetic interpolation gives 40 g; and duplicates, missing metadata, non-positive area and extrapolation are rejected. Equation checks pass at 0.01 % relative tolerance. Values are rounded only for display; exports keep full precision.</p>
+      <p>The engine version (0.1.0) and the version of each curve dataset you enter are recorded separately in every export, together with the inputs, units, assumptions and warnings. Independent technical review is pending.</p>
+
+      <h2>References</h2>
+      <ul>
+        <li><a href="https://store.astm.org/d1596-14r21.html">ASTM D1596, dynamic shock cushioning characteristics of packaging material</a></li>
+        <li><a href="https://store.astm.org/standards/d3332">ASTM D3332, mechanical-shock fragility of products using shock machines</a></li>
+        <li><a href="https://www.pregis.com/knowledge-hub/how-cushion-curves-enable-smarter-packaging-decisions/">Pregis, how cushion curves support packaging decisions</a></li>
+      </ul>
+      <p class="small muted">Public summaries are not substitutes for the complete standards.</p>
+    </article>
+  </main>
+
+  <footer class="footer" style="max-width:46rem">
+    <p>Calculator EP01. Product owner: Chetan Patadiya. Engineering decision support only; not a shipping qualification.</p>
+  </footer>
+</body>
+</html>
